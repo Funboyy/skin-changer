@@ -49,6 +49,7 @@ public class SkinChangeActivity extends Activity {
   private FlexibleContentWidget inputWidget;
 
   private Action action;
+  private boolean updateRequired;
 
   public SkinChangeActivity() {
     this.addon = SkinChangerAddon.get();
@@ -158,6 +159,7 @@ public class SkinChangeActivity extends Activity {
       this.addon.getNameCache().remove(skinChangeWidget.getUserName());
       this.skinChangeWidgets.remove(skinChangeWidget.getUserName());
       this.skinChangeList.listSession().setSelectedEntry(null);
+      this.updateRequired = true;
       this.setAction(null);
     }));
 
@@ -268,6 +270,7 @@ public class SkinChangeActivity extends Activity {
       this.addon.configuration().removeInvalidSkinChanges();
 
       skinChangeWidget.applyUserName();
+      this.updateRequired = true;
       this.setAction(null);
     });
 
@@ -315,6 +318,14 @@ public class SkinChangeActivity extends Activity {
   public void openSkinChangeWidget(final SkinChangeWidget skinChangeWidget) {
     this.creationSkinChange = skinChangeWidget;
     setAction(Action.CREATE);
+  }
+
+  @Override
+  public void onCloseScreen() {
+    super.onCloseScreen();
+    if (this.updateRequired) {
+      this.addon.getNameCache().reloadTextures();
+    }
   }
 
   private enum Action {
