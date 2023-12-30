@@ -249,6 +249,9 @@ public class SkinChangeActivity extends Activity {
     doneButton.setEnabled(!nameTextField.getText().trim().isEmpty() && skinChange.hasSkin());
 
     doneButton.setPressable(() -> {
+      skinChange.setEnabled(checkBoxWidget.state() == State.CHECKED);
+      skinChangeWidget.setSkinChange(skinChange);
+
       if (this.action == Action.ADD || this.action == Action.CREATE) {
         this.skinChangeWidgets.put(skinChangeWidget.getUserName(), skinChangeWidget);
         this.skinChangeList.listSession().setSelectedEntry(skinChangeWidget);
@@ -264,8 +267,6 @@ public class SkinChangeActivity extends Activity {
 
       this.addon.configuration().removeInvalidSkinChanges();
 
-      skinChange.setEnabled(checkBoxWidget.state() == State.CHECKED);
-      skinChangeWidget.setSkinChange(skinChange);
       skinChangeWidget.applyUserName();
       this.setAction(null);
     });
