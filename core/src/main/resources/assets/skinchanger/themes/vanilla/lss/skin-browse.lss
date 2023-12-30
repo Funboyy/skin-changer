@@ -1,0 +1,85 @@
+.content {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: 5;
+  margin-right: 7;
+
+  .content-header {
+    height: fit-content;
+    left: 0;
+    right: 0;
+    space-between-entries: 4;
+    margin-bottom: 3;
+
+    .search-field {
+      alignment: left;
+      width: 50%;
+    }
+
+    .order-dropdown {
+      alignment: right;
+    }
+  }
+
+  .feed {
+    tiles-per-line: 5;
+    tile-height: 100;
+    space-between-entries: 5;
+  }
+}
+
+.player-scroll {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  modify-content-width: false;
+  padding: 0 0 3 0;
+
+  .feed {
+    top: 0;
+    height: fit-content;
+  }
+
+  Scrollbar {
+    width: 4;
+    margin-left: 3;
+  }
+}
+
+SkinPreview {
+  Icon {
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    object-fit: contain;
+  }
+
+  .button {
+    visible: false;
+  }
+
+  &:hover {
+    .button {
+      visible: true;
+      left: 0;
+      right: 0;
+      height: 14;
+      renderer: "Button";
+
+      Component {
+        top: 50%;
+        left: 50%;
+        alignment-x: center;
+        alignment-y: center;
+      }
+    }
+  }
+
+  .apply-button {
+    bottom: 0;
+  }
+}

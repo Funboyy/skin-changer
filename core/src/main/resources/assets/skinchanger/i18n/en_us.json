@@ -1,0 +1,44 @@
+{
+  "skinchanger": {
+    "settings": {
+      "name": "SkinChanger",
+      "enabled": {
+        "name": "Enabled"
+      },
+      "openSkinChanges": {
+        "name": "Edit Skin Changes"
+      },
+      "refresh":{
+        "name": "Reload Skin Changes",
+        "text": "Reload"
+      },
+      "header": {
+        "skins": {
+          "name": "Skin Changes"
+        }
+      }
+    },
+    "gui": {
+      "manage": {
+        "add": "Add a new Skin Change",
+        "name": "Minecraft Username",
+        "enabled": {
+          "name": "Enabled"
+        },
+        "skin": {
+          "title": "Select a skin replacement",
+          "open": "View on laby.net",
+          "apply": "Select",
+          "order": {
+            "trending": "Trending",
+            "mostUsed": "Most Used",
+            "latest": "Newest"
+          }
+        },
+        "remove": {
+          "title": "Do you really want to remove this entry?"
+        }
+      }
+    }
+  }
+}
