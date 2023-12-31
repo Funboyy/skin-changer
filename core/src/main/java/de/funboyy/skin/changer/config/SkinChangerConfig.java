@@ -1,6 +1,5 @@
 package de.funboyy.skin.changer.config;
 
-import de.funboyy.skin.changer.NameCache;
 import de.funboyy.skin.changer.SkinChangerAddon;
 import de.funboyy.skin.changer.gui.activity.SkinChangeActivity;
 import java.util.HashMap;

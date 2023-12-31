@@ -1,7 +1,6 @@
 package de.funboyy.skin.changer.config;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.UUID;
 import net.labymod.api.Constants.Urls;
 import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +12,7 @@ public class SkinChange {
   }
 
   public static SkinChange createDefault() {
-    return new SkinChange(true, null, null);
+    return create(true, null, null);
   }
 
   private boolean enabled;
