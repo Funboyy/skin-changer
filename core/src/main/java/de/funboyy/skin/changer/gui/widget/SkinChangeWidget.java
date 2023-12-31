@@ -1,4 +1,4 @@
-package de.funboyy.skin.changer.gui.activity;
+package de.funboyy.skin.changer.gui.widget;
 
 import de.funboyy.skin.changer.config.SkinChange;
 import net.labymod.api.client.component.Component;
@@ -11,6 +11,11 @@ import net.labymod.api.client.gui.screen.widget.widgets.renderer.IconWidget;
 
 @AutoWidget
 public class SkinChangeWidget extends SimpleWidget {
+
+  /**
+   * This class was inspired by
+   * {@code net.labymod.addons.customnametags.gui.activity.NameTagWidget}
+   * **/
 
   private String userName;
   private String originalName;

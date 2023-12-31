@@ -2,6 +2,8 @@ package de.funboyy.skin.changer.gui.activity;
 
 import de.funboyy.skin.changer.SkinChangerAddon;
 import de.funboyy.skin.changer.config.SkinChange;
+import de.funboyy.skin.changer.gui.widget.PlayerModelWidget;
+import de.funboyy.skin.changer.gui.widget.SkinChangeWidget;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -26,12 +28,16 @@ import net.labymod.api.client.gui.screen.widget.widgets.layout.list.HorizontalLi
 import net.labymod.api.client.gui.screen.widget.widgets.layout.list.VerticalListWidget;
 import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.labynet.models.textures.Skin;
-import net.labymod.core.client.gui.screen.widget.widgets.customization.PlayerModelWidget;
 
 @AutoActivity
 @Link("manage.lss")
 @Link("overview.lss")
 public class SkinChangeActivity extends Activity {
+
+  /**
+   * This class was inspired by
+   * {@code net.labymod.addons.customnametags.gui.activity.NameTagActivity}
+   * **/
 
   private static final Pattern NAME_PATTERN = Pattern.compile("[\\w_]{0,16}");
   private static final Skin DEFAULT_SKIN = new Skin(SkinVariant.CLASSIC, "66088fe456abc1215cb0e918d8fe5bef");
@@ -238,7 +244,6 @@ public class SkinChangeActivity extends Activity {
 
     final PlayerModelWidget playerModel = new PlayerModelWidget();
     playerModel.addId("model");
-    playerModel.setRenderCosmetics(false);
     playerModel.setModel(skinChange.hasSkin() ? new Skin(skinChange.getSkinVariant(),
         skinChange.getImageHash()) : DEFAULT_SKIN);
     modelWrapper.addChild(playerModel);

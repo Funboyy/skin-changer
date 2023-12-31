@@ -1,12 +1,14 @@
 package de.funboyy.skin.changer.gui.activity;
 
 import de.funboyy.skin.changer.SkinChangerAddon;
+import de.funboyy.skin.changer.gui.widget.SkinChangeWidget;
+import de.funboyy.skin.changer.gui.widget.SkinPreviewWidget;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import net.labymod.api.Laby;
+import net.labymod.api.Constants.Urls;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.gui.screen.Parent;
 import net.labymod.api.client.gui.screen.activity.Activity;
@@ -22,14 +24,24 @@ import net.labymod.api.client.gui.screen.widget.widgets.layout.ScrollWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.TilesGridFeedWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.list.HorizontalListWidget;
 import net.labymod.api.labynet.models.textures.Skin;
+import net.labymod.api.labynet.models.textures.TextureResult;
 import net.labymod.api.labynet.models.textures.TextureResult.Order;
 import net.labymod.api.labynet.models.textures.TextureResult.Type;
 import net.labymod.api.util.Debounce;
-import net.labymod.core.labynet.DefaultLabyNetController;
+import net.labymod.api.util.io.web.UrlBuilder;
+import net.labymod.api.util.io.web.request.Callback;
+import net.labymod.api.util.io.web.request.Request;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @AutoActivity
 @Link("skin-browse.lss")
 public class SkinBrowseActivity extends Activity {
+
+  /**
+   * This class was inspired by
+   * {@code net.labymod.core.client.gui.screen.activity.activities.labymod.child.player.SkinBrowseActivity}
+   * **/
 
   private static final int PAGE_SIZE = 42;
   private static final Map<Order, SkinBrowserOrderCache> ORDER_CACHES = new HashMap<>();
@@ -206,9 +218,7 @@ public class SkinBrowseActivity extends Activity {
         }
       }
 
-      final DefaultLabyNetController labyNetController = (DefaultLabyNetController)
-          Laby.references().labyNetController();
-      labyNetController.loadTextures(Type.SKIN, this.search, this.order, offset, PAGE_SIZE, response -> {
+      loadTextures(this.search, this.order, offset, response -> {
         final SkinCache skinCache = new SkinCache(offset, response.isPresent()
             ? response.get().getTextures() : new ArrayList<>());
         this.skinCaches.add(skinCache);
@@ -217,6 +227,31 @@ public class SkinBrowseActivity extends Activity {
 
       return null;
     }
+
+    private static void loadTextures(
+        @Nullable final String search,
+        @NotNull final Order order,
+        final int offset,
+        @NotNull final Callback<TextureResult> response
+    ) {
+      final UrlBuilder url = new UrlBuilder(String.format(Urls.LABYNET_TEXTURE_SEARCH,
+          Type.SKIN.name(), order.name().toLowerCase()));
+
+      if (SkinBrowseActivity.PAGE_SIZE != 0) {
+        url.addParameter("limit", SkinBrowseActivity.PAGE_SIZE);
+      }
+
+      if (offset != 0) {
+        url.addParameter("offset", offset);
+      }
+
+      if (search != null && !search.isEmpty()) {
+        url.addParameter("input", search);
+      }
+
+      Request.ofGson(TextureResult.class).url(url.build()).async().execute(response);
+    }
+
   }
 
   private static class SkinCache {

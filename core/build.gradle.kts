@@ -5,7 +5,6 @@ plugins {
 }
 
 dependencies {
-    labyApi("core")
     api(project(":api"))
 }
 

@@ -1,5 +1,6 @@
-package de.funboyy.skin.changer.gui.activity;
+package de.funboyy.skin.changer.gui.widget;
 
+import de.funboyy.skin.changer.gui.activity.SkinBrowseActivity;
 import net.labymod.api.Constants.Urls;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.gui.lss.property.annotation.AutoWidget;
@@ -17,6 +18,11 @@ import net.labymod.api.labynet.models.textures.Skin;
 
 @AutoWidget
 public class SkinPreviewWidget extends AbstractWidget<Widget> {
+
+  /**
+   * This class was inspired by
+   * {@code net.labymod.core.client.gui.screen.activity.activities.labymod.child.player.widgets.skin.SkinPreviewWidget}
+   * **/
 
   private final SkinBrowseActivity skinActivity;
   private final Skin skin;
