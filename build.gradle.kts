@@ -15,7 +15,7 @@ labyMod {
         namespace = "skinchanger"
         displayName = "SkinChanger"
         author = "Funboyy"
-        description = "This addon allows you to change the skin of different player on your client."
+        description = "This addon allows you to change skins of players to any skin you want."
         minecraftVersion = "*"
         version = System.getenv().getOrDefault("VERSION", "0.0.1")
     }
