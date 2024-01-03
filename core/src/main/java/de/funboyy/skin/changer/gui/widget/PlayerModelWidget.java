@@ -13,6 +13,8 @@ import net.labymod.api.client.resources.CompletableResourceLocation;
 import net.labymod.api.client.resources.ResourceLocation;
 import net.labymod.api.client.resources.ResourceLocationFactory;
 import net.labymod.api.client.resources.player.PlayerTextureType;
+import net.labymod.api.client.resources.player.meta.SkinPlayerTextureMeta;
+import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.labynet.models.textures.Skin;
 
 @AutoWidget
@@ -37,6 +39,8 @@ public class PlayerModelWidget extends ModelWidget {
     final ResourceLocationFactory resourceFactory = Laby.references().resourceLocationFactory();
     final ResourceLocation resourceLocation = resourceFactory.create(
         SkinChangerAddon.get().addonInfo().getNamespace(), skin.getImageHash());
+    resourceLocation.metadata().set("texture_meta",
+        new SkinPlayerTextureMeta(skin.skinVariant() == SkinVariant.SLIM));
     final CompletableResourceLocation completable = Laby.references().textureRepository()
         .getOrRegisterTexture(resourceLocation, skin.getDownloadUrl(),
             this.labyAPI.playerTextureService().policyProcessor(PlayerTextureType.SKIN),
