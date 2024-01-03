@@ -27,6 +27,7 @@ import net.labymod.api.labynet.models.textures.Skin;
 import net.labymod.api.labynet.models.textures.TextureResult;
 import net.labymod.api.labynet.models.textures.TextureResult.Order;
 import net.labymod.api.labynet.models.textures.TextureResult.Type;
+import net.labymod.api.metadata.Metadata;
 import net.labymod.api.util.Debounce;
 import net.labymod.api.util.io.web.UrlBuilder;
 import net.labymod.api.util.io.web.request.Callback;
@@ -275,8 +276,9 @@ public class SkinBrowseActivity extends Activity {
   }
 
   public void setSkin(final Skin skin) {
-    this.skinChangeWidget.getSkinChange().setImageHash(skin.getImageHash());
-    this.skinChangeWidget.getSkinChange().setSkinVariant(skin.skinVariant());
+    final Metadata metadata = this.skinChangeWidget.metadata();
+    metadata.set("skin_variant", skin.skinVariant());
+    metadata.set("image_hash", skin.getImageHash());
 
     final Activity activity = SkinChangerAddon.get().configuration().openSkinChanges();
     this.displayScreen(activity);

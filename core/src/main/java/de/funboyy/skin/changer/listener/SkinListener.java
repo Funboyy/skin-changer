@@ -32,7 +32,7 @@ public class SkinListener {
 
     final SkinChange skinChange = getSkinChange(event.profile());
 
-    if (skinChange == null || !skinChange.isEnabled() || !skinChange.hasSkin()) {
+    if (skinChange == null || !skinChange.isEnabled()) {
       return;
     }
 

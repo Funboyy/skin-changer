@@ -3,7 +3,7 @@ package de.funboyy.skin.changer.config;
 import com.google.gson.annotations.SerializedName;
 import net.labymod.api.Constants.Urls;
 import net.labymod.api.client.session.MinecraftServices.SkinVariant;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public class SkinChange {
 
@@ -12,7 +12,7 @@ public class SkinChange {
   }
 
   public static SkinChange createDefault() {
-    return create(true, null, null);
+    return create(true, "66088fe456abc1215cb0e918d8fe5bef", SkinVariant.CLASSIC);
   }
 
   private boolean enabled;
@@ -35,11 +35,11 @@ public class SkinChange {
     this.enabled = enabled;
   }
 
-  public @Nullable String getImageHash() {
+  public String getImageHash() {
     return this.imageHash;
   }
 
-  public void setImageHash(@Nullable final String imageHash) {
+  public void setImageHash(@NotNull final String imageHash) {
     this.imageHash = imageHash;
   }
 
@@ -47,16 +47,12 @@ public class SkinChange {
     return String.format(Urls.LABYNET_TEXTURE_DOWNLOAD, this.getImageHash());
   }
 
-  public @Nullable SkinVariant getSkinVariant() {
+  public SkinVariant getSkinVariant() {
     return this.skinVariant;
   }
 
-  public void setSkinVariant(@Nullable final SkinVariant skinVariant) {
+  public void setSkinVariant(@NotNull final SkinVariant skinVariant) {
     this.skinVariant = skinVariant;
-  }
-
-  public boolean hasSkin() {
-    return this.imageHash != null && this.skinVariant != null;
   }
 
 }

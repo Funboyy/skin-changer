@@ -49,7 +49,8 @@ public class SkinChangerConfig extends AddonConfig {
 
   public void removeInvalidSkinChanges() {
     this.skinChanges.entrySet()
-        .removeIf(entry -> entry.getKey().isEmpty() || !entry.getValue().hasSkin());
+        .removeIf(entry -> entry.getKey().isEmpty() || entry.getValue().getImageHash() == null
+            || entry.getValue().getSkinVariant() == null);
   }
 
 }

@@ -18,12 +18,10 @@ public class SkinChangeWidget extends SimpleWidget {
    * **/
 
   private String userName;
-  private String originalName;
   private SkinChange skinChange;
 
   public SkinChangeWidget(final String userName, final SkinChange skinChange) {
     this.userName = userName;
-    this.originalName = userName;
     this.skinChange = skinChange;
   }
 
@@ -58,20 +56,19 @@ public class SkinChangeWidget extends SimpleWidget {
     this.userName = userName;
   }
 
-  public String getOriginalName() {
-    return this.originalName;
-  }
-
-  public void applyUserName() {
-    this.originalName = this.userName;
-  }
-
   public SkinChange getSkinChange() {
     return this.skinChange;
   }
 
   public void setSkinChange(final SkinChange skinChange) {
     this.skinChange = skinChange;
+  }
+
+  public void resetMeta() {
+    this.metadata().remove("user_name");
+    this.metadata().remove("enabled");
+    this.metadata().remove("skin_variant");
+    this.metadata().remove("image_hash");
   }
 
 }

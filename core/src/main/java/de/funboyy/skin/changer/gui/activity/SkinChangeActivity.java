@@ -26,8 +26,8 @@ import net.labymod.api.client.gui.screen.widget.widgets.layout.FlexibleContentWi
 import net.labymod.api.client.gui.screen.widget.widgets.layout.ScrollWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.list.HorizontalListWidget;
 import net.labymod.api.client.gui.screen.widget.widgets.layout.list.VerticalListWidget;
-import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.labynet.models.textures.Skin;
+import net.labymod.api.metadata.Metadata;
 
 @AutoActivity
 @Link("manage.lss")
@@ -40,7 +40,6 @@ public class SkinChangeActivity extends Activity {
    * **/
 
   private static final Pattern NAME_PATTERN = Pattern.compile("[\\w_]{0,16}");
-  private static final Skin DEFAULT_SKIN = new Skin(SkinVariant.CLASSIC, "66088fe456abc1215cb0e918d8fe5bef");
 
   private final SkinChangerAddon addon;
   private final VerticalListWidget<SkinChangeWidget> skinChangeList;
@@ -176,6 +175,7 @@ public class SkinChangeActivity extends Activity {
   }
 
   private DivWidget initializeManageContainer(final SkinChangeWidget skinChangeWidget) {
+    final Metadata meta = skinChangeWidget.metadata();
     final SkinChange skinChange = skinChangeWidget.getSkinChange();
     final ButtonWidget doneButton = ButtonWidget.i18n("labymod.ui.button.done");
 
@@ -198,18 +198,9 @@ public class SkinChangeActivity extends Activity {
     final TextFieldWidget nameTextField = new TextFieldWidget();
     nameTextField.addId("input-name");
     nameTextField.maximalLength(16);
-    nameTextField.setText(skinChangeWidget.getUserName());
+    nameTextField.setText(meta.has("user_name") ? meta.get("user_name") : skinChangeWidget.getUserName());
     nameTextField.validator(newValue -> NAME_PATTERN.matcher(newValue).matches());
-    nameTextField.updateListener(newValue -> {
-      doneButton.setEnabled(!newValue.trim().isEmpty() &&
-          skinChange.hasSkin());
-
-      if (newValue.equals(skinChangeWidget.getUserName())) {
-        return;
-      }
-
-      skinChangeWidget.setUserName(newValue);
-    });
+    nameTextField.updateListener(newValue -> doneButton.setEnabled(!newValue.trim().isEmpty()));
 
     settingsWrapper.addChild(nameTextField);
 
@@ -226,14 +217,20 @@ public class SkinChangeActivity extends Activity {
 
     final CheckBoxWidget checkBoxWidget = new CheckBoxWidget();
     checkBoxWidget.addId("checkbox-item");
-    checkBoxWidget.setState(skinChange.isEnabled() ? State.CHECKED : State.UNCHECKED);
+
+    final boolean enabled = meta.has("enabled") ? meta.get("enabled") : skinChange.isEnabled();
+    checkBoxWidget.setState(enabled ? State.CHECKED : State.UNCHECKED);
     checkBoxDiv.addChild(checkBoxWidget);
     settingsWrapper.addChild(checkBoxDiv);
     inputWrapper.addChild(settingsWrapper);
 
     browseButton.setPressable(() -> {
-      skinChange.setEnabled(checkBoxWidget.state() == State.CHECKED);
-      skinChangeWidget.setSkinChange(skinChange);
+      final Metadata metadata = skinChangeWidget.metadata();
+      metadata.set("user_name", nameTextField.getText());
+      metadata.set("enabled", checkBoxWidget.state() == State.CHECKED);
+      metadata.set("skin_variant", skinChange.getSkinVariant());
+      metadata.set("image_hash", skinChange.getImageHash());
+      skinChangeWidget.metadata(metadata);
 
       this.displayScreen(new SkinBrowseActivity(skinChangeWidget));
       this.setAction(null);
@@ -244,8 +241,11 @@ public class SkinChangeActivity extends Activity {
 
     final PlayerModelWidget playerModel = new PlayerModelWidget();
     playerModel.addId("model");
-    playerModel.setModel(skinChange.hasSkin() ? new Skin(skinChange.getSkinVariant(),
-        skinChange.getImageHash()) : DEFAULT_SKIN);
+
+    final Skin skin = meta.has("skin_variant") && meta.has("image_hash") ?
+        new Skin(meta.get("skin_variant"), meta.get("image_hash")) :
+        new Skin(skinChange.getSkinVariant(), skinChange.getImageHash());
+    playerModel.setModel(skin);
     modelWrapper.addChild(playerModel);
     inputWrapper.addChild(modelWrapper);
     this.inputWidget.addContent(inputWrapper);
@@ -253,35 +253,39 @@ public class SkinChangeActivity extends Activity {
     final HorizontalListWidget buttonList = new HorizontalListWidget();
     buttonList.addId("edit-button-menu");
 
-    doneButton.setEnabled(!nameTextField.getText().trim().isEmpty() && skinChange.hasSkin());
+    doneButton.setEnabled(!nameTextField.getText().trim().isEmpty());
 
     doneButton.setPressable(() -> {
+      final String oldName = skinChangeWidget.getUserName();
       skinChange.setEnabled(checkBoxWidget.state() == State.CHECKED);
+      skinChange.setSkinVariant(playerModel.getSkin().skinVariant());
+      skinChange.setImageHash(playerModel.getSkin().getImageHash());
+      skinChangeWidget.setUserName(nameTextField.getText());
       skinChangeWidget.setSkinChange(skinChange);
+      skinChangeWidget.resetMeta();
 
       if (this.action == Action.ADD || this.action == Action.CREATE) {
-        this.skinChangeWidgets.put(skinChangeWidget.getUserName(), skinChangeWidget);
+        this.skinChangeWidgets.put(nameTextField.getText(), skinChangeWidget);
         this.skinChangeList.listSession().setSelectedEntry(skinChangeWidget);
       }
 
-      if (!skinChangeWidget.getOriginalName().equals(skinChangeWidget.getUserName())) {
-        this.addon.configuration().getSkinChanges().remove(skinChangeWidget.getOriginalName());
-        this.addon.getNameCache().remove(skinChangeWidget.getOriginalName());
+      if (!oldName.equals(skinChangeWidget.getUserName())) {
+        this.addon.configuration().getSkinChanges().remove(oldName);
+        this.addon.getNameCache().remove(oldName);
       }
 
       this.addon.configuration().getSkinChanges().put(skinChangeWidget.getUserName(), skinChange);
       this.addon.getNameCache().add(skinChangeWidget.getUserName());
 
       this.addon.configuration().removeInvalidSkinChanges();
-
-      skinChangeWidget.applyUserName();
       this.updateRequired = true;
       this.setAction(null);
     });
 
     buttonList.addEntry(doneButton);
     buttonList.addEntry(ButtonWidget.i18n("labymod.ui.button.cancel", () -> {
-      skinChangeWidget.setUserName(skinChangeWidget.getOriginalName());
+      skinChangeWidget.resetMeta();
+
       this.setAction(null);
     }));
     this.inputWidget.addContent(buttonList);
@@ -322,7 +326,7 @@ public class SkinChangeActivity extends Activity {
 
   public void openSkinChangeWidget(final SkinChangeWidget skinChangeWidget) {
     this.creationSkinChange = skinChangeWidget;
-    setAction(Action.CREATE);
+    this.setAction(Action.CREATE);
   }
 
   @Override
