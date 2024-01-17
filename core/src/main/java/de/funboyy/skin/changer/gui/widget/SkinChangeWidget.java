@@ -1,6 +1,8 @@
 package de.funboyy.skin.changer.gui.widget;
 
 import de.funboyy.skin.changer.config.SkinChange;
+import net.labymod.api.Constants;
+import net.labymod.api.Constants.Urls;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.gui.icon.Icon;
 import net.labymod.api.client.gui.lss.property.annotation.AutoWidget;
@@ -11,6 +13,8 @@ import net.labymod.api.client.gui.screen.widget.widgets.renderer.IconWidget;
 
 @AutoWidget
 public class SkinChangeWidget extends SimpleWidget {
+
+  private static final String HEAD_URL = Urls.LABYNET_BASE + "api/v3/texture/%s/head.png";
 
   /**
    * This class was inspired by
@@ -45,7 +49,12 @@ public class SkinChangeWidget extends SimpleWidget {
   }
 
   public Icon getIconWidget(final String userName) {
-    return Icon.head(userName.length() == 0 ? "MHF_Question" : userName);
+    if (userName.isEmpty()) {
+      return Icon.head("MHF_Question");
+    }
+
+    return Icon.url(String.format(HEAD_URL, this.metadata()
+        .get("image_hash", this.skinChange.getImageHash())));
   }
 
   public String getUserName() {
