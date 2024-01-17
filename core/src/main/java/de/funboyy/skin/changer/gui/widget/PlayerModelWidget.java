@@ -12,10 +12,8 @@ import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.resources.CompletableResourceLocation;
 import net.labymod.api.client.resources.ResourceLocation;
 import net.labymod.api.client.resources.ResourceLocationFactory;
-import net.labymod.api.client.resources.player.PlayerTextureType;
-import net.labymod.api.client.resources.player.meta.SkinPlayerTextureMeta;
-import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.labynet.models.textures.Skin;
+import net.labymod.api.mojang.model.MojangModelService;
 
 @AutoWidget
 public class PlayerModelWidget extends ModelWidget {
@@ -39,19 +37,24 @@ public class PlayerModelWidget extends ModelWidget {
     final ResourceLocationFactory resourceFactory = Laby.references().resourceLocationFactory();
     final ResourceLocation resourceLocation = resourceFactory.create(
         SkinChangerAddon.get().addonInfo().getNamespace(), skin.getImageHash());
-    resourceLocation.metadata().set("texture_meta",
-        new SkinPlayerTextureMeta(skin.skinVariant() == SkinVariant.SLIM));
     final CompletableResourceLocation completable = Laby.references().textureRepository()
-        .getOrRegisterTexture(resourceLocation, skin.getDownloadUrl(),
-            this.labyAPI.playerTextureService().policyProcessor(PlayerTextureType.SKIN),
-            texture -> {});
+        .getOrRegisterTexture(resourceLocation, skin.getDownloadUrl());
 
     this.labyAPI.minecraft().executeOnRenderThread(() -> this.setModel(completable));
   }
 
   public void setModel(final CompletableResourceLocation resourceLocation) {
-    this.setModel(Laby.labyAPI().playerTextureService().loadModel(PlayerTextureType.SKIN,
-        resourceLocation, this::setModel));
+    final MojangModelService modelService = Laby.references().mojangModelService();
+
+    if (!resourceLocation.isLoading()) {
+      super.setModel(modelService.getPlayerModel(this.skin.skinVariant(), resourceLocation.getCompleted()));
+    }
+
+    resourceLocation.addCompletableListener(() -> {
+      if (!resourceLocation.isLoading()) {
+        super.setModel(modelService.getPlayerModel(this.skin.skinVariant(), resourceLocation.getCompleted()));
+      }
+    });
   }
 
   @Override
