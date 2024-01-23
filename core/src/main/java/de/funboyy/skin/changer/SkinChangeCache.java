@@ -1,25 +1,25 @@
 package de.funboyy.skin.changer;
 
 import com.google.gson.JsonObject;
+import de.hdskins.textureload.api.TextureLoadExtension;
+import de.hdskins.textureload.api.texture.PlayerTextureService;
+import de.hdskins.textureload.api.texture.PlayerTextureType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.labymod.api.Laby;
-import net.labymod.api.client.resources.player.PlayerTextureService;
-import net.labymod.api.client.resources.player.PlayerTextureType;
 import net.labymod.api.util.io.web.request.types.GsonRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class NameCache {
+public class SkinChangeCache {
 
   private static final String PROFILE_URL = "https://api.mojang.com/users/profiles/minecraft/%s";
 
   private final List<Entry> entries = new ArrayList<>();
 
   public void add(final String name) {
-    final Entry entry = get(name);
+    final Entry entry = this.get(name);
 
     if (entry != null) {
       entry.reloadTexture();
@@ -30,18 +30,27 @@ public class NameCache {
   }
 
   public Entry get(final String name) {
-    return this.entries.stream().filter(entry -> entry.getName().equalsIgnoreCase(name))
-        .findFirst().orElse(null);
+    for (final Entry entry : this.entries) {
+      if (entry.getName().equalsIgnoreCase(name)) {
+        return entry;
+      }
+    }
+
+    return null;
   }
 
   public Entry get(final UUID uniqueId) {
-    return this.entries.stream().filter(entry -> entry.getUniqueId() != null)
-        .filter(entry -> entry.getUniqueId().equals(uniqueId))
-        .findFirst().orElse(null);
+    for (final Entry entry : this.entries) {
+      if (uniqueId.equals(entry.getUniqueId())) {
+        return entry;
+      }
+    }
+
+    return null;
   }
 
   public void remove(final String name) {
-    final Entry entry = get(name);
+    final Entry entry = this.get(name);
 
     if (entry != null) {
       this.entries.remove(entry);
@@ -49,10 +58,10 @@ public class NameCache {
   }
   
   public void reloadTextures() {
-    Laby.labyAPI().playerTextureService().invalidateTextures();
+    TextureLoadExtension.references().playerTextureService().invalidateTextures();
   }
 
-  // Using mojang api here because it has a better rate limit for my use case
+  // FixMe: for some player it will not work, because of IDEA-15369
   private static void loadUniqueId(final String name, final Consumer<UUID> result) {
     GsonRequest.of(JsonObject.class).url(PROFILE_URL, name).async().execute(response -> {
       if (response.hasException() || response.isEmpty()) {
@@ -75,6 +84,15 @@ public class NameCache {
         result.accept(null);
       }
     });
+
+    /*Laby.labyAPI().labyNetController().loadUniqueIdByName(name, response -> {
+      if (response.hasException() || response.isEmpty()) {
+        result.accept(null);
+        return;
+      }
+
+      result.accept(response.get());
+    });*/
   }
 
   public static class Entry {
@@ -86,6 +104,10 @@ public class NameCache {
       this.name = name;
 
       loadUniqueId(this.name, response -> {
+        if (response == null) {
+          SkinChangerAddon.get().logger().warn("Failed to load unique id for " + this.name);
+        }
+
         this.uniqueId = response;
         this.reloadTexture();
       });
@@ -102,7 +124,7 @@ public class NameCache {
     }
 
     public void reloadTexture() {
-      final PlayerTextureService textureService = Laby.labyAPI().playerTextureService();
+      final PlayerTextureService textureService = TextureLoadExtension.references().playerTextureService();
       textureService.reloadTexture(PlayerTextureType.SKIN,
           textureService.createProfile(this.uniqueId, this.name));
     }

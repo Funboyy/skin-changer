@@ -18,7 +18,7 @@ public class SkinChangerAddon extends LabyAddon<SkinChangerConfig> {
     return instance;
   }
 
-  private final NameCache nameCache = new NameCache();
+  private final SkinChangeCache skinChangeCache = new SkinChangeCache();
 
   @Override
   protected void enable() {
@@ -26,7 +26,11 @@ public class SkinChangerAddon extends LabyAddon<SkinChangerConfig> {
     this.registerListener(new SkinListener());
 
     this.configuration().removeInvalidSkinChanges();
-    this.configuration().getSkinChanges().keySet().forEach(this.nameCache::add);
+    this.configuration().getSkinChanges().keySet().forEach(this.skinChangeCache::add);
+
+    if (this.wasLoadedInRuntime()) {
+      this.skinChangeCache.reloadTextures();
+    }
   }
 
   @Override
@@ -34,8 +38,8 @@ public class SkinChangerAddon extends LabyAddon<SkinChangerConfig> {
     return SkinChangerConfig.class;
   }
 
-  public NameCache getNameCache() {
-    return this.nameCache;
+  public SkinChangeCache getSkinChange() {
+    return this.skinChangeCache;
   }
 
 }

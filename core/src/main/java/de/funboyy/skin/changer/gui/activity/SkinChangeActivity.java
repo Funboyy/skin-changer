@@ -161,7 +161,7 @@ public class SkinChangeActivity extends Activity {
 
     menu.addEntry(ButtonWidget.i18n("labymod.ui.button.remove", () -> {
       this.addon.configuration().getSkinChanges().remove(skinChangeWidget.getUserName());
-      this.addon.getNameCache().remove(skinChangeWidget.getUserName());
+      this.addon.getSkinChange().remove(skinChangeWidget.getUserName());
       this.skinChangeWidgets.remove(skinChangeWidget.getUserName());
       this.skinChangeList.listSession().setSelectedEntry(null);
       this.updateRequired = true;
@@ -271,11 +271,11 @@ public class SkinChangeActivity extends Activity {
 
       if (!oldName.equals(skinChangeWidget.getUserName())) {
         this.addon.configuration().getSkinChanges().remove(oldName);
-        this.addon.getNameCache().remove(oldName);
+        this.addon.getSkinChange().remove(oldName);
       }
 
       this.addon.configuration().getSkinChanges().put(skinChangeWidget.getUserName(), skinChange);
-      this.addon.getNameCache().add(skinChangeWidget.getUserName());
+      this.addon.getSkinChange().add(skinChangeWidget.getUserName());
 
       this.addon.configuration().removeInvalidSkinChanges();
       this.updateRequired = true;
@@ -333,7 +333,7 @@ public class SkinChangeActivity extends Activity {
   public void onCloseScreen() {
     super.onCloseScreen();
     if (this.updateRequired) {
-      this.addon.getNameCache().reloadTextures();
+      this.addon.getSkinChange().reloadTextures();
     }
   }
 

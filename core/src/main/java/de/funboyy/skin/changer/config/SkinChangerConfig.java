@@ -20,7 +20,7 @@ public class SkinChangerConfig extends AddonConfig {
 
   @SwitchSetting
   private final ConfigProperty<Boolean> enabled = new ConfigProperty<>(true).addChangeListener(
-      (property, oldValue, newValue) -> SkinChangerAddon.get().getNameCache().reloadTextures());
+      (property, oldValue, newValue) -> SkinChangerAddon.get().getSkinChange().reloadTextures());
 
   @Exclude
   private final Map<String, SkinChange> skinChanges = new HashMap<>();
@@ -44,7 +44,7 @@ public class SkinChangerConfig extends AddonConfig {
   @MethodOrder(after = "openSkinChanges")
   @ButtonSetting
   public void refresh() {
-    SkinChangerAddon.get().getNameCache().reloadTextures();
+    SkinChangerAddon.get().getSkinChange().reloadTextures();
   }
 
   public void removeInvalidSkinChanges() {
