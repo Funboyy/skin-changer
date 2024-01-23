@@ -1,19 +1,20 @@
 package de.funboyy.skin.changer.listener;
 
-import de.funboyy.skin.changer.NameCache.Entry;
+import de.funboyy.skin.changer.SkinChangeCache.Entry;
 import de.funboyy.skin.changer.SkinChangerAddon;
 import de.funboyy.skin.changer.config.SkinChange;
+import de.hdskins.textureload.api.TextureLoadExtension;
+import de.hdskins.textureload.api.event.TextureLoadEvent;
+import de.hdskins.textureload.api.texture.PlayerTexture;
+import de.hdskins.textureload.api.texture.PlayerTextureType;
+import de.hdskins.textureload.api.texture.meta.SkinPlayerTextureMeta;
 import java.util.concurrent.CompletableFuture;
 import net.labymod.api.Laby;
 import net.labymod.api.client.resources.CompletableResourceLocation;
 import net.labymod.api.client.resources.ResourceLocation;
 import net.labymod.api.client.resources.ResourceLocationFactory;
-import net.labymod.api.client.resources.player.PlayerTexture;
-import net.labymod.api.client.resources.player.PlayerTextureType;
-import net.labymod.api.client.resources.player.meta.SkinPlayerTextureMeta;
 import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.event.Subscribe;
-import net.labymod.api.event.client.entity.player.TextureLoadEvent;
 import net.labymod.api.mojang.GameProfile;
 
 public class SkinListener {
@@ -30,7 +31,7 @@ public class SkinListener {
       return;
     }
 
-    final SkinChange skinChange = getSkinChange(event.profile());
+    final SkinChange skinChange = this.getSkinChange(event.profile());
 
     if (skinChange == null || !skinChange.isEnabled()) {
       return;
@@ -39,7 +40,7 @@ public class SkinListener {
     final CompletableFuture<PlayerTexture> future = new CompletableFuture<>();
     event.setLoadFuture(future);
 
-    loadSkin(skinChange, future);
+    this.loadSkin(skinChange, future);
   }
 
   private SkinChange getSkinChange(final GameProfile profile) {
@@ -57,7 +58,7 @@ public class SkinListener {
       return null;
     }
 
-    final Entry entry = this.addon.getNameCache().get(profile.getUniqueId());
+    final Entry entry = this.addon.getSkinChange().get(profile.getUniqueId());
 
     if (entry == null) {
       return null;
@@ -74,7 +75,7 @@ public class SkinListener {
         resourceLocation, new SkinPlayerTextureMeta(skin.getSkinVariant() == SkinVariant.SLIM));
     final CompletableResourceLocation cached = Laby.references().textureRepository()
         .getOrRegisterTexture(resourceLocation, skin.getDownloadUrl(),
-            Laby.references().playerTextureService().policyProcessor(PlayerTextureType.SKIN),
+            TextureLoadExtension.references().playerTextureService().policyProcessor(PlayerTextureType.SKIN),
             texture -> future.complete(playerTexture));
 
     if (cached != null && cached.hasResult()) {

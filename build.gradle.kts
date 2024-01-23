@@ -1,3 +1,5 @@
+import net.labymod.gradle.core.addon.info.dependency.AddonDependency
+
 plugins {
     id("java-library")
     id("net.labymod.gradle")
@@ -18,6 +20,7 @@ labyMod {
         description = "This addon allows you to change skins of players to any skin you want."
         minecraftVersion = "*"
         version = System.getenv().getOrDefault("VERSION", "0.0.1")
+        addonDependencies.add(AddonDependency("textureload_extension", false))
     }
 
     minecraft {
@@ -33,7 +36,7 @@ labyMod {
     }
 
     addonDev {
-        snapshotRelease()
+        productionRelease()
     }
 }
 
@@ -45,6 +48,7 @@ subprojects {
     repositories {
         maven("https://libraries.minecraft.net/")
         maven("https://repo.spongepowered.org/repository/maven-public/")
+        maven("https://repo.hdskins.de")
     }
 }
 

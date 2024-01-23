@@ -6,6 +6,10 @@ plugins {
 
 dependencies {
     api(project(":api"))
+
+    compileOnly("de.hdskins.textureload:api:1.0.0") {
+        exclude("net.labymod.labymod4")
+    }
 }
 
 labyModProcessor {
