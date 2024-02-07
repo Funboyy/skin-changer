@@ -10,16 +10,77 @@ import de.hdskins.textureload.api.texture.PlayerTextureType;
 import de.hdskins.textureload.api.texture.meta.SkinPlayerTextureMeta;
 import java.util.concurrent.CompletableFuture;
 import net.labymod.api.Laby;
+import net.labymod.api.client.network.NetworkPlayerInfo;
+import net.labymod.api.client.network.PlayerSkin;
 import net.labymod.api.client.resources.CompletableResourceLocation;
 import net.labymod.api.client.resources.ResourceLocation;
 import net.labymod.api.client.resources.ResourceLocationFactory;
+import net.labymod.api.client.resources.texture.GameImage;
+import net.labymod.api.client.resources.texture.Texture;
 import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.event.Subscribe;
+import net.labymod.api.event.client.network.playerinfo.PlayerInfoAddEvent;
+import net.labymod.api.event.client.network.playerinfo.PlayerInfoUpdateEvent;
+import net.labymod.api.metadata.Metadata;
 import net.labymod.api.mojang.GameProfile;
+import net.labymod.api.mojang.texture.SkinPolicy;
 
 public class SkinListener {
 
   private final SkinChangerAddon addon = SkinChangerAddon.get();
+
+  @Subscribe
+  public void onPlayerInfoAdd(final PlayerInfoAddEvent event) {
+    if (!this.addon.configuration().enabled().get() || !this.addon.configuration().variant().get()) {
+      return;
+    }
+
+    this.updateSkinVariant(event.playerInfo());
+  }
+
+  @Subscribe
+  public void onPlayerInfoUpdate(final PlayerInfoUpdateEvent event) {
+    if (!this.addon.configuration().enabled().get() || !this.addon.configuration().variant().get()) {
+      return;
+    }
+
+    this.updateSkinVariant(event.playerInfo());
+  }
+
+  private void updateSkinVariant(final NetworkPlayerInfo playerInfo) {
+    final PlayerSkin skin = playerInfo.getSkin();
+
+    if (skin == null) {
+      return;
+    }
+
+    final ResourceLocation location = skin.getSkinTexture();
+    final Metadata metadata = location.metadata();
+
+    if (metadata.has("skin_variant")) {
+      skin.setSkinVariant(metadata.get("skin_variant"));
+      return;
+    }
+
+    final Texture texture = Laby.references().textureRepository().getTexture(location);
+
+    if (texture == null) {
+      return;
+    }
+
+    final GameImage image = GameImage.IMAGE_PROVIDER.loadImage(texture);
+    final SkinVariant variant = SkinPolicy.guessVariant(image);
+
+    if (skin.getSkinVariant() == variant) {
+      return;
+    }
+
+    this.addon.logger().debug(String.format("Changes skin variant of %s (%s) from %s to %s",
+        playerInfo.profile().getUsername(), playerInfo.profile().getUniqueId(), skin.getSkinVariant(), variant));
+
+    metadata.set("skin_variant", variant);
+    skin.setSkinVariant(variant);
+  }
 
   @Subscribe
   public void onTextureLoad(final TextureLoadEvent event) {

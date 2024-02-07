@@ -22,6 +22,10 @@ public class SkinChangerConfig extends AddonConfig {
   private final ConfigProperty<Boolean> enabled = new ConfigProperty<>(true).addChangeListener(
       (property, oldValue, newValue) -> SkinChangerAddon.get().getSkinChange().reloadTextures());
 
+  @SettingSection("skins")
+  @SwitchSetting
+  private final ConfigProperty<Boolean> variant = new ConfigProperty<>(true);
+
   @Exclude
   private final Map<String, SkinChange> skinChanges = new HashMap<>();
 
@@ -30,12 +34,15 @@ public class SkinChangerConfig extends AddonConfig {
     return this.enabled;
   }
 
+  public ConfigProperty<Boolean> variant() {
+    return this.variant;
+  }
+
   public Map<String, SkinChange> getSkinChanges() {
     return this.skinChanges;
   }
 
-  @SettingSection("skins")
-  @MethodOrder(after = "enabled")
+  @MethodOrder(after = "variant")
   @ActivitySetting
   public Activity openSkinChanges() {
     return new SkinChangeActivity();

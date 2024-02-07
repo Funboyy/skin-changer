@@ -5,6 +5,10 @@
       "enabled": {
         "name": "Enabled"
       },
+      "variant": {
+        "name": "Fix Wrong Skin Variant (Experimental)",
+        "description": "If enabled the addon will try to use the correct variant for each skin. (e.g. some players use a slim skin on a classic model, so the addon would change the model to slim)"
+      },
       "openSkinChanges": {
         "name": "Edit Skin Changes"
       },
