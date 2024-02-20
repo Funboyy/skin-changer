@@ -59,9 +59,11 @@ public class SkinListener {
       return;
     }
 
-    for (final NetworkPlayerInfo playerInfo : packetListener.getNetworkPlayerInfos()) {
-      this.updateSkinVariant(playerInfo);
-    }
+    Laby.labyAPI().minecraft().executeNextTick(() -> {
+      for (final NetworkPlayerInfo playerInfo : packetListener.getNetworkPlayerInfos()) {
+        this.updateSkinVariant(playerInfo);
+      }
+    });
   }
 
   @Subscribe
@@ -106,12 +108,10 @@ public class SkinListener {
     final GameImage image = GameImage.IMAGE_PROVIDER.loadImage(texture);
     final SkinVariant variant = SkinChangerPolicy.guessVariant(image);
 
-    if (skin.getSkinVariant() == variant) {
-      return;
+    if (skin.getSkinVariant() != variant) {
+      this.addon.logger().debug(String.format("Changes skin variant of %s (%s) from %s to %s",
+          playerInfo.profile().getUsername(), playerInfo.profile().getUniqueId(), skin.getSkinVariant(), variant));
     }
-
-    this.addon.logger().debug(String.format("Changes skin variant of %s (%s) from %s to %s",
-        playerInfo.profile().getUsername(), playerInfo.profile().getUniqueId(), skin.getSkinVariant(), variant));
 
     metadata.set("skin_variant", variant);
     skin.setSkinVariant(variant);
