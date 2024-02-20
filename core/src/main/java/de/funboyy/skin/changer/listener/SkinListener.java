@@ -2,6 +2,7 @@ package de.funboyy.skin.changer.listener;
 
 import de.funboyy.skin.changer.SkinChangeCache.Entry;
 import de.funboyy.skin.changer.SkinChangerAddon;
+import de.funboyy.skin.changer.SkinChangerPolicy;
 import de.funboyy.skin.changer.config.SkinChange;
 import de.hdskins.textureload.api.TextureLoadExtension;
 import de.hdskins.textureload.api.event.TextureLoadEvent;
@@ -10,6 +11,7 @@ import de.hdskins.textureload.api.texture.PlayerTextureType;
 import de.hdskins.textureload.api.texture.meta.SkinPlayerTextureMeta;
 import java.util.concurrent.CompletableFuture;
 import net.labymod.api.Laby;
+import net.labymod.api.client.network.ClientPacketListener;
 import net.labymod.api.client.network.NetworkPlayerInfo;
 import net.labymod.api.client.network.PlayerSkin;
 import net.labymod.api.client.resources.CompletableResourceLocation;
@@ -21,13 +23,46 @@ import net.labymod.api.client.session.MinecraftServices.SkinVariant;
 import net.labymod.api.event.Subscribe;
 import net.labymod.api.event.client.network.playerinfo.PlayerInfoAddEvent;
 import net.labymod.api.event.client.network.playerinfo.PlayerInfoUpdateEvent;
+import net.labymod.api.event.client.network.server.ServerJoinEvent;
+import net.labymod.api.event.client.network.server.ServerSwitchEvent;
+import net.labymod.api.event.client.network.server.SubServerSwitchEvent;
 import net.labymod.api.metadata.Metadata;
 import net.labymod.api.mojang.GameProfile;
-import net.labymod.api.mojang.texture.SkinPolicy;
 
 public class SkinListener {
 
   private final SkinChangerAddon addon = SkinChangerAddon.get();
+
+  @Subscribe
+  public void onServerJoin(final ServerJoinEvent event) {
+    this.handleJoinAndSwitch();
+  }
+
+  @Subscribe
+  public void onServerSwitch(final ServerSwitchEvent event) {
+    this.handleJoinAndSwitch();
+  }
+
+  @Subscribe
+  public void onSubServerSwitch(final SubServerSwitchEvent event) {
+    this.handleJoinAndSwitch();
+  }
+
+  private void handleJoinAndSwitch() {
+    if (!this.addon.configuration().enabled().get() || !this.addon.configuration().variant().get()) {
+      return;
+    }
+
+    final ClientPacketListener packetListener = Laby.labyAPI().minecraft().getClientPacketListener();
+
+    if (packetListener == null) {
+      return;
+    }
+
+    for (final NetworkPlayerInfo playerInfo : packetListener.getNetworkPlayerInfos()) {
+      this.updateSkinVariant(playerInfo);
+    }
+  }
 
   @Subscribe
   public void onPlayerInfoAdd(final PlayerInfoAddEvent event) {
@@ -69,7 +104,7 @@ public class SkinListener {
     }
 
     final GameImage image = GameImage.IMAGE_PROVIDER.loadImage(texture);
-    final SkinVariant variant = SkinPolicy.guessVariant(image);
+    final SkinVariant variant = SkinChangerPolicy.guessVariant(image);
 
     if (skin.getSkinVariant() == variant) {
       return;
