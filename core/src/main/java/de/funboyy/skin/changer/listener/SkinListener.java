@@ -106,6 +106,11 @@ public class SkinListener {
     }
 
     final GameImage image = GameImage.IMAGE_PROVIDER.loadImage(texture);
+
+    if (image.getWidth() != 64 || (image.getHeight() != 32 && image.getHeight() != 64)) {
+      return;
+    }
+    
     final SkinVariant variant = SkinChangerPolicy.guessVariant(image);
 
     if (skin.getSkinVariant() != variant) {
